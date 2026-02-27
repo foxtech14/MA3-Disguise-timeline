@@ -14,42 +14,6 @@ local MB = MessageBox;
 -- function lookup table
 local functions = {};
 
-
--- ****************************************************************
--- macro creation function
--- ****************************************************************
-
-local function createMacros()
-    -- input dialog for user input for cue number
-    local macroNum = MB({
-        title = "Start Macro number?",
-        commands = {{value = 1, name = "Ok"}},
-        inputs = {{name = "Macro", whiteFilter = "0123456789"}},
-        backColor = "Global.Default",
-        icon = "logo_small",
-    });
-
-    -- convert user input
-    local num = clamp(tonumber(macroNum.inputs['Macro']), 1, 9999);
-    local cmd1 = 'Call Plugin "BBLX Disguise Cue Trigger" "create"';
-    local cmd2 = 'Call Plugin "BBLX Disguise Cue Trigger" "delete"';
-    local cmd3 = 'SetGlobalVariable "d3fixture" (Disguise Fixture Number)';
-
-    C(string.format("Store Macro %s.1", num));
-    C(string.format("Set Macro %s.1 Property \"Command\" \"%s\"", num, cmd1));
-    C(string.format("Label Macro %s \"%s\"", num, "Store Disgusie Trigger"));
-
-    num = num + 1;
-    C(string.format("Store Macro %s.1", num));
-    C(string.format("Set Macro %s.1 Property \"Command\" \"%s\"", num, cmd2));
-    C(string.format("Label Macro %s \"%s\"", num, "Delete Disgusie Trigger"));
-
-    num = num + 1;
-    C(string.format("Store Macro %s.1", num));
-    C(string.format("Set Macro %s.1 Property \"Command\" \"%s\"", num, cmd3));
-    C(string.format("Label Macro %s \"%s\"", num, "Set Disguise Fixture Number"));
-end
-
 -- ****************************************************************
 -- cue input function
 -- ****************************************************************
@@ -84,8 +48,39 @@ end
 
 
 -- ****************************************************************
--- cue function
+-- main functions
 -- ****************************************************************
+
+functions['createmacros'] = function()
+    -- input dialog for user input for cue number
+    local macroNum = MB({
+        title = "Start Macro number?",
+        commands = {{value = 1, name = "Ok"}},
+        inputs = {{name = "Macro", whiteFilter = "0123456789"}},
+        backColor = "Global.Default",
+        icon = "logo_small",
+    });
+
+    -- convert user input
+    local num = clamp(tonumber(macroNum.inputs['Macro']), 1, 9999);
+    local cmd1 = 'Call Plugin "BBLX Disguise Cue Trigger" "create"';
+    local cmd2 = 'Call Plugin "BBLX Disguise Cue Trigger" "delete"';
+    local cmd3 = 'SetGlobalVariable "d3fixture" (Disguise Fixture Number)';
+
+    C(string.format("Store Macro %s.1", num));
+    C(string.format("Set Macro %s.1 Property \"Command\" \"%s\"", num, cmd1));
+    C(string.format("Label Macro %s \"%s\"", num, "Store Disgusie Trigger"));
+
+    num = num + 1;
+    C(string.format("Store Macro %s.1", num));
+    C(string.format("Set Macro %s.1 Property \"Command\" \"%s\"", num, cmd2));
+    C(string.format("Label Macro %s \"%s\"", num, "Delete Disgusie Trigger"));
+
+    num = num + 1;
+    C(string.format("Store Macro %s.1", num));
+    C(string.format("Set Macro %s.1 Property \"Command\" \"%s\"", num, cmd3));
+    C(string.format("Label Macro %s \"%s\"", num, "Set Disguise Fixture Number"));
+end
 
 functions['create'] = function()
     local fixture = GetVar(GlobalVars(),'d3fixture');
