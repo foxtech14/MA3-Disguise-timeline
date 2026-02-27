@@ -33,7 +33,7 @@ local function createMacros()
     local num = clamp(tonumber(macroNum.inputs['Macro']), 1, 9999);
     local cmd1 = 'Call Plugin "BBLX Disguise Cue Trigger" "create"';
     local cmd2 = 'Call Plugin "BBLX Disguise Cue Trigger" "delete"';
-    local cmd3 = 'Call Plugin "BBLX Disguise Cue Trigger" "setfixture"';
+    local cmd3 = 'SetGlobalVariable "d3fixture" (Disguise Fixture Number)';
 
     C(string.format("Store Macro %s.1", num));
     C(string.format("Set Macro %s.1 Property \"Command\" \"%s\"", num, cmd1));
@@ -88,8 +88,15 @@ end
 -- ****************************************************************
 
 functions['create'] = function()
+    local fixture = GetVar(GlobalVars(),'d3fixture');
+
+    if fixture == nil then
+        E("Fixture number has not been set");
+        E("Please run the plugin macro to set the fixture number");
+        return
+    end
+
     local qNum, padNum, cueXX, cueYY, cueZZ;
-    local fixture = GetVar(UserVars(),'d3fixture');
 
     qNum = getQ();
     padNum = qNum + 10000.001;
