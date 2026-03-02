@@ -35,11 +35,15 @@ local function getQ()
     -- input dialog for user input for cue number
     local inputCue = MB({
         title = "What Cue number?",
-        commands = {{value = 1, name = "Ok"}},
+        commands = {{value = 1, name = "Ok"},{value = 0, name = "Cancel"}},
         inputs = {{name = "Q", whiteFilter = "0123456789."}},
         backColor = "Global.Default",
         icon = "logo_small",
     });
+
+    if inputCue.result == 0 then
+        return false;
+    end
 
     -- convert user input
     local num = clamp(tonumber(inputCue.inputs['Q']), 0.01, 9999.99);
@@ -55,45 +59,51 @@ functions['createmacros'] = function()
     -- input dialog for user input for cue number
     local macroNum = MB({
         title = "Start Macro number?",
-        commands = {{value = 1, name = "Ok"}},
+        commands = {{value = 1, name = "Ok"},{value = 0, name = "Skip"}},
         inputs = {{name = "Macro", whiteFilter = "0123456789"}},
         backColor = "Global.Default",
         icon = "logo_small",
     });
 
-    -- convert user input
-    local num = clamp(tonumber(macroNum.inputs['Macro']), 1, 9999);
-    local cmd1 = 'Call Plugin "BBLX Disguise Cue Trigger" "create"';
-    local cmd2 = 'Call Plugin "BBLX Disguise Cue Trigger" "delete"';
-    local cmd3 = 'SetGlobalVariable "d3fixture" (Disguise Fixture Number)';
+    if macroNum.result == 1 then
+        -- convert user input
+        local num = clamp(tonumber(macroNum.inputs['Macro']), 1, 9999);
+        local cmd1 = 'Call Plugin "BBLX d3 Cue Trigger" "create"';
+        local cmd2 = 'Call Plugin "BBLX d3 Cue Trigger" "delete"';
+        local cmd3 = 'SetGlobalVariable "d3fixture" (Disguise Fixture Number)';
 
-    C(string.format("Store Macro %s.1", num));
-    C(string.format("Set Macro %s.1 Property \"Command\" \"%s\"", num, cmd1));
-    C(string.format("Label Macro %s \"%s\"", num, "Store Disgusie Trigger"));
+        C(string.format("Store Macro %s.1", num));
+        C(string.format("Set Macro %s.1 Property 'Command' '%s'", num, cmd1));
+        C(string.format("Label Macro %s '%s'", num, "Store d3 Trigger"));
 
-    num = num + 1;
-    C(string.format("Store Macro %s.1", num));
-    C(string.format("Set Macro %s.1 Property \"Command\" \"%s\"", num, cmd2));
-    C(string.format("Label Macro %s \"%s\"", num, "Delete Disgusie Trigger"));
+        num = num + 1;
+        C(string.format("Store Macro %s.1", num));
+        C(string.format("Set Macro %s.1 Property 'Command' '%s'", num, cmd2));
+        C(string.format("Label Macro %s '%s'", num, "Delete d3 Trigger"));
 
-    num = num + 1;
-    C(string.format("Store Macro %s.1", num));
-    C(string.format("Set Macro %s.1 Property \"Command\" \"%s\"", num, cmd3));
-    C(string.format("Label Macro %s \"%s\"", num, "Set Disguise Fixture Number"));
+        num = num + 1;
+        C(string.format("Store Macro %s.1", num));
+        C(string.format("Set Macro %s.1 Property 'Command' '%s'", num, cmd3));
+        C(string.format("Label Macro %s '%s'", num, "Set d3 Fixture Number"));
+    end
+
+    C(string.format("Call Macro '%s'", "Set d3 Fixture Number"))
 end
 
 functions['create'] = function()
     local fixture = GetVar(GlobalVars(),'d3fixture');
 
     if fixture == nil then
-        E("Fixture number has not been set");
-        E("Please run the plugin macro to set the fixture number");
+        E("Fixture Number has not been set");
+        E("Generating Macros and setting Fixture Number");
+        functions['createmacros']();
         return
     end
 
     local qNum, padNum, cueXX, cueYY, cueZZ;
-
     qNum = getQ();
+
+    if not qNum then return end
     padNum = qNum + 10000.001;
     -- extract relevant numbers
     cueXX = string.sub(padNum, -8,-7);
@@ -123,6 +133,7 @@ end
 
 functions['delete'] = function()
     local qNum = getQ();
+    if not qNum then return end
     C(string.format("Delete Cue %s Part 71 /nc", qNum));
 end
 
@@ -133,7 +144,7 @@ end
 local function main(display,argument)
     E("Disguise Q Wizard");
     if argument then
-        functions[spiltString(argument,",",1)]();
+        functions[argument]();
     else
         functions['create']();
     end
